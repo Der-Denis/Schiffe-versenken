@@ -219,7 +219,7 @@ function platziereSchiff(start, wert, ausrichtung)
     let schifftyp = "";
     let schiffVorhanden = false;
     let schiffsflache = []; // Vorlage zur Reservierung des benötigten Bereichs für das Schiff
-    let sperrflache = []; // Vorlage zur Sperrung der Bereiche nebenan
+    let sperrbereich = []; // Vorlage zur Sperrung der Bereiche nebenan
     //console.log("Ausrichtung: " + ausrichtung); // Testausgabe
 
     switch (wert)
@@ -255,17 +255,22 @@ function platziereSchiff(start, wert, ausrichtung)
 
     if (schiffVorhanden) // Statusmeldungen an Spieler
     {
-        // benötigte Elemente in schiffsflache laden
+        // benötigte Elemente in schiffsflache laden + sperrbereich füllen
         for (let zeichne = 0; wert > zeichne; zeichne++)
         {
-            let IDsperre = "";
-            //console.log("Start: "+start); // Testausgabe
+            let IDsperreDavor = "";
+            let IDsperreDanach = "";
+            let ende = "";
+            console.log("Start: " + start); // Testausgabe
             let IDzusatz = "";
             if (ausrichtung === "h") // horizontal
             {
                 let temp = zeichne + parseInt(start.slice(1)); // zur vorbereitung der variablen Zahl der ID
-                //console.log(temp); // Testausgabe
+                //console.log("Temp: " + temp); // Testausgabe
                 IDzusatz = start.charAt(0) + temp;
+                IDsperreDavor = String.fromCharCode(start.charCodeAt(0) - 1) + temp;
+                IDsperreDanach = String.fromCharCode(start.charCodeAt(0) + 1) + temp;
+                //console.log("von " + IDsperreDavor + " bis " + IDsperreDanach); // Testausgabe für davor und danach sperren
             }
             else // vertikal
             {
@@ -274,7 +279,53 @@ function platziereSchiff(start, wert, ausrichtung)
                 IDzusatz = temp + start.slice(1);
             }
             //console.log("schiffsflache..."); // Testausgabe
+
+            let pruefen = document.getElementById("spieler." + IDsperreDavor);
+            if (pruefen !== null)
+            {
+                sperrbereich.push(pruefen);
+            }
+            pruefen = document.getElementById("spieler." + IDsperreDanach);
+            if (pruefen !== null)
+            {
+                sperrbereich.push(pruefen);
+            }
             schiffsflache.push(document.getElementById("spieler." + IDzusatz));
+        }
+
+        // Sperrbereich erweitern: eins nach vorne + eins nach hinten, falls möglich (document.getElementById=null, wenn nicht da)
+        console.log("erstes Element: " + sperrbereich[0].id); // Testausgabe - erstes Element
+        console.log("letztes Element: " + sperrbereich[sperrbereich.length - 1].id); // Testausgabe - letztes Element
+
+
+        // horizontal (vertikal fehlt)
+        let sperranfang = sperrbereich[0].id.split("."); // Sperrelement für Start
+        let sperrende = sperrbereich[sperrbereich.length - 1].id.split("."); // Sperrelement für Ende
+        let zusatzsperreAnfang = sperranfang[1].slice(1) - 1;
+        let zusatzsperreEnde = parseInt(sperrende[1].slice(1)) + 1;
+        //console.log("ZusatzsperreEnde: " + sperrende); // Testausgabe
+
+        for (let zusatz = 0; zusatz < 3; zusatz++)
+        {
+            // linke Seite sperren
+            let temp = String.fromCharCode(sperranfang[1].charCodeAt(0) + zusatz) + zusatzsperreAnfang;
+            console.log("ID: " + "spieler." + temp); // Testausgabe
+            let pruefen = document.getElementById("spieler." + temp);
+            if (pruefen !== null)
+            {
+                sperrbereich.push(pruefen);
+                //console.log("Test: "+pruefen); // Testausgabe
+            }
+
+            // rechte Seite sperren
+            temp = String.fromCharCode(sperrende[1].charCodeAt(0) + zusatz) + (zusatzsperreEnde); // gefällt mir nicht
+            pruefen = document.getElementById("spieler." + temp);
+            console.log("neu Temp: " + temp);
+            if (pruefen !== null)
+            {
+                sperrbereich.push(pruefen);
+                console.log("Test: " + pruefen.id); // Testausgabe
+            }
         }
 
         let check = true; // alle Felder müssen frei sein
@@ -312,7 +363,12 @@ function platziereSchiff(start, wert, ausrichtung)
             document.getElementById("status").innerHTML = schifftyp + " wurde platziert.";
 
             // Bereich drumherum sperren
-
+            for (const element of sperrbereich) // Schiff platzeren
+            {
+                element.innerHTML = "X";
+                element.style.backgroundColor = "yellow";
+            }
+            console.log(sperrbereich); // Testausgabe des Sperrbereichs
 
         }
         else // mindestens ein Feld belegt
