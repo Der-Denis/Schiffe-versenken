@@ -1,15 +1,22 @@
 // Variablen
 let zahler = 0;
-let anzahl = 10;
-let index = 'a';
+let anzahl = 10; // Zeilen & Spalten
+let index = 'a'; // Zeilenanfang
+let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
+
+// Anzahl der Schiffe (mit Feldgröße)
+let schiff2 = 4; // U-Boote
+let schiff3 = 3; // Zerstörer
+let schiff4 = 2; // Kreuzer
+let schiff5 = 1; // Schlachtschiff
 
 // Startzustand herstellen nach Laden der Seite
 window.addEventListener("load", ladenErfolgreich);
 function ladenErfolgreich()
 {
     document.getElementById("start").addEventListener("click", timerStarten); // Timer setzen
-    plazierungVorbereiten();
-    //spielzugVorbereitung(); // Testaufruf zur Überprüfung
+    vorbereiten("spieler", platzieren); // was soll vorbereitet werden? "platzieren" / "spielzug" + welches Feld
+    //vorbereiten("gegner", spielzug); // Testaufruf zur Überprüfung
 }
 
 function timerStarten()
@@ -46,7 +53,14 @@ function verbinden()
         }
         catch (error)
         {
-            return;
+            try
+            {
+                xhttp = new ActiveXObject("Microsoft.XMLHTTP"); // Microsoft
+            }
+            catch (error)
+            {
+                return;
+            }
         }
     }
     // Ende - Browserweiche
@@ -77,22 +91,22 @@ function ajax()
     }
 }
 
-// Spalzierung der Schiffe
-
-function plazierungVorbereiten() // fügt alle benötigten EventListener zu
+// Spalzierung der Schiffe (feld="spieler"; auswahl=platzieren) / Spielzüge (feld="gegner"; auswahl=spielzug)
+function vorbereiten(feld, auswahl) // Parameter
 {
     //console.log("Plazierung wird vorbereitet..."); // Testausgabe
-    
+    index = 'a'; // Zurücksetzen des Indexes
+
     // Für jede Reihe ( A - J )
-    for(let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
+    for (let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
     {
-        // Reihe A
+        // jeweilige Reihe
         for (let zahl = 1; zahl <= anzahl; zahl++)
         {
             //console.log("Index: "+index);
-            let idFeld = "spieler." + index + zahl;
+            let idFeld = feld + "." + index + zahl;
             //console.log(idFeld); // id-Ausgabe zum Test
-            document.getElementById(idFeld).addEventListener("click", platzieren);
+            document.getElementById(idFeld).addEventListener("click", auswahl);
         }
         index = String.fromCharCode(index.charCodeAt(0) + 1);
     }
@@ -102,30 +116,13 @@ function plazierungVorbereiten() // fügt alle benötigten EventListener zu
 
 function platzieren()
 {
-    console.log(this.id);
-    // id des Elements
-}
+    //console.log(this.id); // id des Elements (Testausgabe)
+    let id = this.id;
+    const array = id.split(".");
+    let feld = array[1];
+    console.log(feld);
 
-// Spielzüge
 
-function spielzugVorbereitung() // noch zu testen
-{
-    //console.log("Züge werden vorbereitet..."); // Testausgabe
-    index = 'a'; // Zurücksetzen des Indexes
-    
-    // Für jede Reihe ( A - J )
-    for(let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
-    {
-        // Reihe A
-        for (let zahl = 1; zahl <= anzahl; zahl++)
-        {
-            //console.log("Index: "+index);
-            let idFeld = "gegner." + index + zahl;
-            //console.log(idFeld); // id-Ausgabe zum Test
-            document.getElementById(idFeld).addEventListener("click", spielzug);
-        }
-        index = String.fromCharCode(index.charCodeAt(0) + 1);
-    }
 }
 
 // Logik der Spielzüge
