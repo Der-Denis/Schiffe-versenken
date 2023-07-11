@@ -26,24 +26,40 @@ td:hover
     background-color: black;
 }
 
+/* Gleichmäßiges Gitter für 3 gleichgroße Kontainer */
+
 .spielbereich
 {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
     background-color: rgb(173, 173, 173);
-    height: 60vh;
-    width: 90vw;
-}
-
-.links
-{
-    float: left;
-}
-
-.rechts
-{
-    float: right;
+    width: calc(100vw - 15px);
 }
 
 .eigenesSpielfeld
 {
-    background-color: aqua;
+    background-color: aqua; /* Starthintergrundfarbe */
+}
+
+.inhalt /* Anpassung der Schiffanzeige */
+{
+    font-size: larger;
+    padding: 30px;
+}
+
+.spielernamensfeld /* linksbündig mit Abstand zu links */
+{
+    float: left;
+    margin-left: 10vw;
+}
+
+.gegnernamensfeld /* rechtsbündig mit Abstand zu rechts */
+{
+    float: right;
+    margin-right: 10vw;
+}
+
+.vs /* Zentrierung durch Abstand zu links */
+{
+    margin-left: 24vw;
 }

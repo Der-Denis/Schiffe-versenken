@@ -109,7 +109,7 @@ function vorbereiten(feld, auswahl) // Parameter
             document.getElementById(idFeld).addEventListener("click", auswahl);
             //console.log(auswahl); // Testausgabe
         }
-        index = String.fromCharCode(index.charCodeAt(0) + 1);
+        index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
     }
 }
 
@@ -345,7 +345,7 @@ function platziereSchiff(start, wert, ausrichtung)
             //console.log("ZusatzsperreAnfang: " + zusatzsperreAnfang); // Testausgabe
             //console.log("ZusatzsperreEnde: " + zusatzsperreEnde); // Testausgabe
 
-            for (let zusatz = -1; zusatz < 2; zusatz++) // Verschiebung nach oben -> -1
+            for (let zusatz = -1; zusatz < 2; zusatz++) // Verschiebung nach links -> -1
             {
                 // linke Seite sperren
                 let temp = zusatzsperreAnfang + (parseInt(schiffanfang[1].slice(1)) + zusatz); // Erzeugung der ID oben
@@ -390,15 +390,19 @@ function platziereSchiff(start, wert, ausrichtung)
             {
                 case 5:
                     schiff5--;
+                    document.getElementById("schiff5").innerHTML = parseInt(document.getElementById("schiff5").innerHTML) + 1;
                     break;
                 case 4:
                     schiff4--;
+                    document.getElementById("schiff4").innerHTML = parseInt(document.getElementById("schiff4").innerHTML) + 1;
                     break;
                 case 3:
                     schiff3--;
+                    document.getElementById("schiff3").innerHTML = parseInt(document.getElementById("schiff3").innerHTML) + 1;
                     break;
                 case 2:
                     schiff2--;
+                    document.getElementById("schiff2").innerHTML = parseInt(document.getElementById("schiff2").innerHTML) + 1;
             }
             for (const element of schiffsflache) // Schiff platzeren
             {
@@ -434,7 +438,7 @@ function platziereSchiff(start, wert, ausrichtung)
     }
 }
 
-function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die Möglichkeit
+function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die Evenlistener für die Platzierung der Schiffe
 {
     //console.log("Wasser wird vorbereitet..."); // Testausgabe
     index = 'a'; // Zurücksetzen des Indexes
@@ -456,12 +460,12 @@ function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die M
             //console.log("idFeld remove: " + idFeld);
             document.getElementById(idFeld).removeEventListener("click", feldauswahl); // entferne die Auswahlmöglichkeit auf dem eigenen Spielfeld
         }
-        index = String.fromCharCode(index.charCodeAt(0) + 1);
+        index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
     }
     setTimeout(meldungNachPlatzierung, 200); // damit Meldung erst nach den platzieren des letzten Schiffs auftaucht (200ms)
 }
 
-function meldungNachPlatzierung()
+function meldungNachPlatzierung() // gibt die Bestätigung für den Spieler aus, dass alle Schiffe platziert wurden.
 {
     alert("Es wurden alle Schiffe platziert.");
 }

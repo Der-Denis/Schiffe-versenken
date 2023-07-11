@@ -14,9 +14,9 @@
     <body>
         <!-- Spieler 1 vs Spieler 2 -->
         <div id="spielernamen">
-            <input type="text" id="spieler" name="spieler" placeholder="Spielername">
-            vs
-            <input type="text" id="gegner" name="gegner" readonly>
+            <input type="text" id="spieler" name="spieler" class="spielernamensfeld" placeholder="Spielername">
+            <span class="vs">vs</span>
+            <input type="text" id="gegner" name="gegner" class="gegnernamensfeld">
         </div>
 
         <div id="status">
@@ -25,7 +25,7 @@
 
         <div class="spielbereich">
             <!-- eigenes eigenesSpielfeld -->
-            <table class="links">
+            <table>
                 <tr>
                     <th>&nbsp;</th>
                     <th>1</th>
@@ -195,8 +195,23 @@
                     <th>&nbsp;</th>
                 </tr>
             </table>
+
+            <!-- Schiffanzeige -->
+            <div class="inhalt">
+                Schiffe:
+                <br>
+                <br>
+                ■■■■■ &nbsp; <span id="schiff5">0</span> / 1
+                <br>
+                ■■■■ &nbsp; &nbsp; <span id="schiff4">0</span> / 2
+                <br>
+                ■■■ &nbsp; &nbsp; &nbsp; <span id="schiff3">0</span> / 3
+                <br>
+                ■■ &nbsp; &nbsp; &nbsp; &nbsp; <span id="schiff2">0</span> / 4
+            </div>
+
             <!-- gegnerisches eigenesSpielfeld -->
-            <table class="rechts">
+            <table>
                 <tr>
                     <th>&nbsp;</th>
                     <th>1</th>
@@ -366,6 +381,7 @@
                     <th>&nbsp;</th>
                 </tr>
             </table>
+
         </div>
 
         <div class="mittig">
