@@ -44,7 +44,7 @@ td:hover
 .inhalt /* Anpassung der Schiffanzeige */
 {
     font-size: larger;
-    padding: 30px;
+    padding-left: 30px;
 }
 
 .spielernamensfeld /* linksbündig mit Abstand zu links */

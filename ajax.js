@@ -10,22 +10,26 @@ let schiff3 = 3; // Zerstörer
 let schiff4 = 2; // Kreuzer
 let schiff5 = 1; // Schlachtschiff
 
+// Antwort des Servers
+let antwort
+
 // Startzustand herstellen nach Laden der Seite
 window.addEventListener("load", ladenErfolgreich);
 function ladenErfolgreich()
 {
-    document.getElementById("start").addEventListener("click", timerStarten); // Timer setzen
+    //document.getElementById("start").addEventListener("click", timerStarten); // Timer setzen // Testaufruf zur Überprüfung
     vorbereiten("spieler", feldauswahl); // was soll vorbereitet werden? "feldauswahl" / "spielzug" + welches Feld
     //vorbereiten("gegner", spielzug); // Testaufruf zur Überprüfung
 }
 
-function timerStarten()
+function timerStarten() // Verbindungsaufbau für Spiel starten
 {
     if (document.getElementById("spieler").value !== "") // Spielernamen eigegeben?
     {
         document.getElementById("spieler").readOnly = true; // Feld für Spielernamen sperren
         document.getElementById("start").removeEventListener("click", timerStarten); // nur 1x Spiel beginnen
-        setInterval(verbinden, 5000); // alle 5 Sekunden
+        //setInterval(verbinden, 5000); // alle 5 Sekunden
+        
     }
     else
     {
@@ -86,8 +90,8 @@ function ajax()
     // readyState = 4 -> Rückmeldung vollständig ; status = 200 -> Rückmeldung fehlerfrei
     if (this.readyState == 4 && this.status == 200)
     {
-        let antwort = this.responseText;
-        console.log(antwort);
+        antwort = this.responseText;
+        // function für weiteren Ablauf
     }
 }
 
@@ -225,7 +229,7 @@ function platziereSchiff(start, wert, ausrichtung)
     let sperrbereich = []; // Vorlage zur Sperrung der Bereiche nebenan
     //console.log("Ausrichtung: " + ausrichtung); // Testausgabe
 
-    switch (wert)
+    switch (wert) // Schifftyp festlegen + Prüfung ob vorhanden (Bestand > 0)
     {
         case 5:
             schifftyp = "Schlachtschiff";
@@ -256,9 +260,9 @@ function platziereSchiff(start, wert, ausrichtung)
             }
     }
 
-    if (schiffVorhanden) // Statusmeldungen an Spieler
+    if (schiffVorhanden) // wenn Schifftyp Anzahl > 0
     {
-        // benötigte Elemente in schiffsflache laden + sperrbereich füllen
+        // benötigte Elemente in schiffsflache laden + sperrbereich neben Schiff befüllen
         for (let zeichne = 0; wert > zeichne; zeichne++)
         {
             let IDsperreDavor = "";
@@ -287,6 +291,7 @@ function platziereSchiff(start, wert, ausrichtung)
             }
             //console.log("schiffsflache..."); // Testausgabe
 
+            // nur existierende Elemente in Array schreiben
             let pruefen = document.getElementById("spieler." + IDsperreDavor);
             if (pruefen !== null)
             {
@@ -371,8 +376,6 @@ function platziereSchiff(start, wert, ausrichtung)
             }
         }
 
-
-
         let check = true; // alle Felder müssen frei sein
         for (let element of schiffsflache) // Prüfen ob Felder frei für Platzierung
         {
@@ -412,7 +415,7 @@ function platziereSchiff(start, wert, ausrichtung)
             document.getElementById("status").innerHTML = schifftyp + " wurde platziert.";
 
             // Bereich drumherum sperren
-            for (const element of sperrbereich) // Schiff platzeren
+            for (const element of sperrbereich) // Sperrfläche um das Schiff drum herum platzieren
             {
                 element.innerHTML = "X";
                 element.style.backgroundColor = "yellow";
@@ -440,7 +443,7 @@ function platziereSchiff(start, wert, ausrichtung)
 
 function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die Evenlistener für die Platzierung der Schiffe
 {
-    //console.log("Wasser wird vorbereitet..."); // Testausgabe
+    //console.log("Wasser wird verschüttet..."); // Testausgabe
     index = 'a'; // Zurücksetzen des Indexes
 
     // Für jede Reihe ( A - J )
@@ -468,5 +471,28 @@ function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die E
 function meldungNachPlatzierung() // gibt die Bestätigung für den Spieler aus, dass alle Schiffe platziert wurden.
 {
     alert("Es wurden alle Schiffe platziert.");
+    document.getElementById("start").addEventListener("click", timerStarten); // Spiel bereit zum Starten -> Verbinden mit Server
 }
 
+function spielfeldLaden() // array aus dem Spielfeldes zurückgeben ("id=wert")
+{
+    index = 'a'; // Zurücksetzen des Indexes
+    let spielfeld = [];
+
+    // Für jede Reihe ( A - J )
+    for (let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
+    {
+        // jeweilige Reihe
+        for (let zahl = 1; zahl <= anzahl; zahl++)
+        {
+            //console.log("Index: "+index); // Testausgabe
+            let idFeld = "spieler." + index + zahl;
+            //console.log(idFeld); // id-Ausgabe zum Test
+            spielfeld.push(idFeld + "=" + document.getElementById(idFeld).innerHTML)
+            //console.log("idFeld remove: " + idFeld);
+        }
+        index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
+    }
+
+    return spielfeld;
+}
