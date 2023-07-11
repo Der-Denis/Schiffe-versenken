@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<FRAME GUID="2FB25471-B62C-4EE6-BD43-F819C095ACF8" FORMAT="0000" APP_VERSION="2.2.0.8" CHECKSUM="AE0EB67400FE5ECC">
-  <PROJECT FORMAT="1.00" NAME="Schiffe versenken" AUTHOR="ojdanide" CREATED="2023.07.06 10:33:45" MODIFIED="2023.07.06 16:05:17">
+<FRAME GUID="2FB25471-B62C-4EE6-BD43-F819C095ACF8" FORMAT="0000" APP_VERSION="2.2.0.8" CHECKSUM="391C36ED61443748">
+  <PROJECT FORMAT="1.00" NAME="Schiffe versenken" AUTHOR="ojdanide" CREATED="2023.07.06 10:33:45" MODIFIED="2023.07.11 10:49:43">
     <DIAGRAMS>
-      <DIAGRAM FORMAT="1.00" ID="0" NAME="Registrierungsvorgang zum Spiel" CREATED="2023.07.06 10:33:56" MODIFIED="2023.07.06 14:44:33">
+      <DIAGRAM FORMAT="1.00" ID="0" NAME="Registrierungsvorgang zum Spiel" CREATED="2023.07.06 10:33:56" MODIFIED="2023.07.11 10:49:43">
         <LAYOUT FORMAT="1.00" COLUMNS="7" ROWS="11">
           <ENTRIES>
             <ENTRY COLUMN="0" ROW="3">
@@ -17,7 +17,7 @@
             </ENTRY>
             <ENTRY COLUMN="0" ROW="6">
               <FIGURE SUBTYPE="PapComment" FORMAT="1.00" ID="132">
-                <TEXT><![CDATA[Je nach Überprüfung nur Spielernamen eingeben oder Schiffe neu platzieren]]></TEXT>
+                <TEXT><![CDATA[Je nach Überprüfung nur Spielernamen eingeben oder restliche Schiffe platzieren]]></TEXT>
               </FIGURE>
             </ENTRY>
             <ENTRY COLUMN="1" ROW="0" ANCHOR="True">
@@ -47,7 +47,7 @@
             </ENTRY>
             <ENTRY COLUMN="1" ROW="6">
               <FIGURE SUBTYPE="PapCondition" FORMAT="1.00" ID="20">
-                <TEXT><![CDATA[Schiffe gültig gesetzt?]]></TEXT>
+                <TEXT><![CDATA[Alle Schiffe gesetzt?]]></TEXT>
               </FIGURE>
             </ENTRY>
             <ENTRY COLUMN="1" ROW="7">

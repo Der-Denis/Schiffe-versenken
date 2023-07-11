@@ -1,6 +1,6 @@
 // Variablen
 let zahler = 0;
-let anzahl = 10; // Zeilen & Spalten
+let anzahl = 10; // für Zeilen & Spalten
 let index = 'a'; // Zeilenanfang
 let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
 
@@ -21,7 +21,7 @@ function ladenErfolgreich()
 
 function timerStarten()
 {
-    if (document.getElementById("spieler").value !== "")
+    if (document.getElementById("spieler").value !== "") // Spielernamen eigegeben?
     {
         document.getElementById("spieler").readOnly = true; // Feld für Spielernamen sperren
         document.getElementById("start").removeEventListener("click", timerStarten); // nur 1x Spiel beginnen
@@ -29,7 +29,7 @@ function timerStarten()
     }
     else
     {
-        alert("Spielernamen eingeben!");
+        alert("Spielernamen eingeben!"); // Meldung, dies nachzuholen
     }
 }
 
@@ -55,7 +55,7 @@ function verbinden()
         {
             try
             {
-                xhttp = new ActiveXObject("Microsoft.XMLHTTP"); // Microsoft
+                xhttp = new ActiveXObject("Microsoft.XMLHTTP");
             }
             catch (error)
             {
@@ -103,10 +103,11 @@ function vorbereiten(feld, auswahl) // Parameter
         // jeweilige Reihe
         for (let zahl = 1; zahl <= anzahl; zahl++)
         {
-            //console.log("Index: "+index);
+            //console.log("Index: "+index); // Testausgabe
             let idFeld = feld + "." + index + zahl;
-            //console.log(idFeld); // id-Ausgabe zum Test
+            //console.log("idFeld add: " + idFeld); // id-Ausgabe zum Test
             document.getElementById(idFeld).addEventListener("click", auswahl);
+            //console.log(auswahl); // Testausgabe
         }
         index = String.fromCharCode(index.charCodeAt(0) + 1);
     }
@@ -200,6 +201,8 @@ function spielzug()
     console.log(this.id);
 }
 
+// Korrektur der berechneten Schiffslänge
+
 function korrigiereLang(wert)
 {
     if (wert < 0) // Wert negativ
@@ -260,23 +263,27 @@ function platziereSchiff(start, wert, ausrichtung)
         {
             let IDsperreDavor = "";
             let IDsperreDanach = "";
-            let ende = "";
-            console.log("Start: " + start); // Testausgabe
+            //console.log("Start: " + start); // Testausgabe
             let IDzusatz = "";
             if (ausrichtung === "h") // horizontal
             {
                 let temp = zeichne + parseInt(start.slice(1)); // zur vorbereitung der variablen Zahl der ID
                 //console.log("Temp: " + temp); // Testausgabe
-                IDzusatz = start.charAt(0) + temp;
+                IDzusatz = start.charAt(0) + temp; // für die Fläche des Schiffs
+                //console.log("IDzusatz: " + IDzusatz);
                 IDsperreDavor = String.fromCharCode(start.charCodeAt(0) - 1) + temp;
                 IDsperreDanach = String.fromCharCode(start.charCodeAt(0) + 1) + temp;
                 //console.log("von " + IDsperreDavor + " bis " + IDsperreDanach); // Testausgabe für davor und danach sperren
             }
             else // vertikal
             {
-                let temp = String.fromCharCode(zeichne + start.charCodeAt(0));
-                //console.log(temp); // Testausgabe
-                IDzusatz = temp + start.slice(1);
+                let temp = String.fromCharCode(zeichne + start.charCodeAt(0)); // zur vorbereitung des variablen Buchstabens der ID
+                //console.log("Temp: " + temp); // Testausgabe
+                IDzusatz = temp + start.slice(1); // für die Fläche des Schiffs
+                //console.log("IDzusatz: " + IDzusatz);
+                IDsperreDavor = temp + (start.slice(1) - 1);
+                IDsperreDanach = temp + (parseInt(start.slice(1)) + 1);
+                //console.log("von " + IDsperreDavor + " bis " + IDsperreDanach); // Testausgabe für davor und danach sperren
             }
             //console.log("schiffsflache..."); // Testausgabe
 
@@ -293,40 +300,78 @@ function platziereSchiff(start, wert, ausrichtung)
             schiffsflache.push(document.getElementById("spieler." + IDzusatz));
         }
 
-        // Sperrbereich erweitern: eins nach vorne + eins nach hinten, falls möglich (document.getElementById=null, wenn nicht da)
-        console.log("erstes Element: " + sperrbereich[0].id); // Testausgabe - erstes Element
-        console.log("letztes Element: " + sperrbereich[sperrbereich.length - 1].id); // Testausgabe - letztes Element
+        let schiffanfang = schiffsflache[0].id.split("."); // Sperrelement für Start
+        let schiffende = schiffsflache[schiffsflache.length - 1].id.split("."); // Sperrelement für Ende
 
+        // Sperrbereich erweitern: eins nach vorne + eins nach hinten (Schiff), falls möglich (document.getElementById(x) == null, wenn nicht da)
 
-        // horizontal (vertikal fehlt)
-        let sperranfang = sperrbereich[0].id.split("."); // Sperrelement für Start
-        let sperrende = sperrbereich[sperrbereich.length - 1].id.split("."); // Sperrelement für Ende
-        let zusatzsperreAnfang = sperranfang[1].slice(1) - 1;
-        let zusatzsperreEnde = parseInt(sperrende[1].slice(1)) + 1;
-        //console.log("ZusatzsperreEnde: " + sperrende); // Testausgabe
-
-        for (let zusatz = 0; zusatz < 3; zusatz++)
+        if (ausrichtung === "h") // horizontale Ausrichtung
         {
-            // linke Seite sperren
-            let temp = String.fromCharCode(sperranfang[1].charCodeAt(0) + zusatz) + zusatzsperreAnfang;
-            console.log("ID: " + "spieler." + temp); // Testausgabe
-            let pruefen = document.getElementById("spieler." + temp);
-            if (pruefen !== null)
-            {
-                sperrbereich.push(pruefen);
-                //console.log("Test: "+pruefen); // Testausgabe
-            }
+            // Verschiebung nach vorne bzw. hinten (vom Schiff aus) -> Anpassung des fixen Wertes (Zahl)
+            let zusatzsperreAnfang = schiffanfang[1].slice(1) - 1; // Zahl von
+            let zusatzsperreEnde = parseInt(schiffende[1].slice(1)) + 1; // Zahl bis
+            //console.log("ZusatzsperreAnfang: " + zusatzsperreAnfang); // Testausgabe
+            //console.log("ZusatzsperreEnde: " + zusatzsperreEnde); // Testausgabe
 
-            // rechte Seite sperren
-            temp = String.fromCharCode(sperrende[1].charCodeAt(0) + zusatz) + (zusatzsperreEnde); // gefällt mir nicht
-            pruefen = document.getElementById("spieler." + temp);
-            console.log("neu Temp: " + temp);
-            if (pruefen !== null)
+            for (let zusatz = -1; zusatz < 2; zusatz++) // Verschiebung nach oben -> -1
             {
-                sperrbereich.push(pruefen);
-                console.log("Test: " + pruefen.id); // Testausgabe
+                // linke Seite sperren
+                let temp = String.fromCharCode(schiffanfang[1].charCodeAt(0) + zusatz) + zusatzsperreAnfang; // Erzeugung der ID links
+                //console.log("ID: " + "spieler." + temp); // Testausgabe
+                let pruefen = document.getElementById("spieler." + temp);
+                if (pruefen !== null)
+                {
+                    sperrbereich.push(pruefen);
+                    //console.log("Test: "+pruefen); // Testausgabe
+                }
+                pruefen = null; // zurücksetzen
+
+                // rechte Seite sperren
+                temp = String.fromCharCode(schiffende[1].charCodeAt(0) + zusatz) + zusatzsperreEnde; // Erzeugung der ID rechts
+                pruefen = document.getElementById("spieler." + temp);
+                //console.log("neu Temp: " + temp);
+                if (pruefen !== null)
+                {
+                    sperrbereich.push(pruefen);
+                    //console.log("Test: " + pruefen.id); // Testausgabe
+                }
             }
         }
+        else // vertikale Ausrichtung
+        {
+            // Verschiebung nach vorne bzw. hinten (vom Schiff aus) -> Anpassung des fixen Wertes (Buchstabe)
+            let zusatzsperreAnfang = String.fromCharCode(schiffanfang[1].charCodeAt(0) - 1); // Buchstabe von
+            let zusatzsperreEnde = String.fromCharCode(schiffende[1].charCodeAt(0) + 1); // Buchstabe bis
+            //console.log("ZusatzsperreAnfang: " + zusatzsperreAnfang); // Testausgabe
+            //console.log("ZusatzsperreEnde: " + zusatzsperreEnde); // Testausgabe
+
+            for (let zusatz = -1; zusatz < 2; zusatz++) // Verschiebung nach oben -> -1
+            {
+                // linke Seite sperren
+                let temp = zusatzsperreAnfang + (parseInt(schiffanfang[1].slice(1)) + zusatz); // Erzeugung der ID oben
+                //console.log("ID: " + "spieler." + temp); // Testausgabe
+                let pruefen = document.getElementById("spieler." + temp);
+                if (pruefen !== null)
+                {
+                    sperrbereich.push(pruefen);
+                    //console.log("Test: "+pruefen); // Testausgabe
+                }
+                pruefen = null; // zurücksetzen
+
+                // rechte Seite sperren
+                temp = zusatzsperreEnde + (parseInt(schiffende[1].slice(1)) + zusatz); // Erzeugung der ID unten
+                pruefen = document.getElementById("spieler." + temp);
+                //console.log("neu Temp: " + temp);
+                if (pruefen !== null)
+                {
+                    sperrbereich.push(pruefen);
+                    //console.log("Test: " + pruefen.id); // Testausgabe
+                }
+                //console.log("------------"); // Testausgabe (Trennung der Schleifendurchläufen)
+            }
+        }
+
+
 
         let check = true; // alle Felder müssen frei sein
         for (let element of schiffsflache) // Prüfen ob Felder frei für Platzierung
@@ -368,7 +413,12 @@ function platziereSchiff(start, wert, ausrichtung)
                 element.innerHTML = "X";
                 element.style.backgroundColor = "yellow";
             }
-            console.log(sperrbereich); // Testausgabe des Sperrbereichs
+            //console.log(sperrbereich); // Testausgabe des Sperrbereichs
+
+            if (schiff5 === 0 && schiff4 === 0 && schiff3 === 0 && schiff2 === 0) // Abfrage ob Schiffe übrig zum platzieren
+            {
+                wasser();
+            }
 
         }
         else // mindestens ein Feld belegt
@@ -382,5 +432,37 @@ function platziereSchiff(start, wert, ausrichtung)
     {
         document.getElementById("status").innerHTML = "Kein " + schifftyp + " mehr verfügbar!";
     }
+}
+
+function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die Möglichkeit
+{
+    //console.log("Wasser wird vorbereitet..."); // Testausgabe
+    index = 'a'; // Zurücksetzen des Indexes
+
+    // Für jede Reihe ( A - J )
+    for (let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
+    {
+        // jeweilige Reihe
+        for (let zahl = 1; zahl <= anzahl; zahl++)
+        {
+            //console.log("Index: "+index); // Testausgabe
+            let idFeld = "spieler." + index + zahl;
+            //console.log(idFeld); // id-Ausgabe zum Test
+            if (document.getElementById(idFeld).innerHTML !== "O") // kein Schiff platziert
+            {
+                document.getElementById(idFeld).innerHTML = "W"; // Wasserzeichen
+                document.getElementById(idFeld).style.backgroundColor = "aqua"; // Wasserhintergrundfarbe
+            }
+            //console.log("idFeld remove: " + idFeld);
+            document.getElementById(idFeld).removeEventListener("click", feldauswahl); // entferne die Auswahlmöglichkeit auf dem eigenen Spielfeld
+        }
+        index = String.fromCharCode(index.charCodeAt(0) + 1);
+    }
+    setTimeout(meldungNachPlatzierung, 200); // damit Meldung erst nach den platzieren des letzten Schiffs auftaucht (200ms)
+}
+
+function meldungNachPlatzierung()
+{
+    alert("Es wurden alle Schiffe platziert.");
 }
 
