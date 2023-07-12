@@ -20,6 +20,7 @@ function ladenErfolgreich()
     //document.getElementById("start").addEventListener("click", timerStarten); // Timer setzen // Testaufruf zur Überprüfung
     vorbereiten("spieler", feldauswahl); // was soll vorbereitet werden? "feldauswahl" / "spielzug" + welches Feld
     //vorbereiten("gegner", spielzug); // Testaufruf zur Überprüfung
+    vorbereitenFelder();
 }
 
 function timerStarten() // Verbindungsaufbau für Spiel starten
@@ -495,4 +496,27 @@ function spielfeldLaden() // array aus dem Spielfeldes zurückgeben ("id=wert")
     }
 
     return spielfeld;
+}
+
+function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeichen vorbelegen
+{
+    //console.log("Wasser wird verschüttet..."); // Testausgabe
+    index = 'a'; // Zurücksetzen des Indexes
+
+    // Für jede Reihe ( A - J )
+    for (let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
+    {
+        // jeweilige Reihe
+        for (let zahl = 1; zahl <= anzahl; zahl++)
+        {
+            //console.log("Index: "+index); // Testausgabe
+            let idFeldSpieler = "spieler." + index + zahl;
+            let idFeldGegner = "gegner." + index + zahl;
+            //console.log(idFeld); // id-Ausgabe zum Test
+            document.getElementById(idFeldSpieler).innerHTML = "W"; // Wasserzeichen
+            document.getElementById(idFeldGegner).innerHTML = "?"; // unbekannt
+            //console.log("idFeld remove: " + idFeld);
+        }
+        index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
+    }
 }
