@@ -1,8 +1,9 @@
 // Variablen
-let zahler = 0;
+let zahler = 0; // Serveranfragen-Zähler für Tests
 let anzahl = 10; // für Zeilen & Spalten
 let index = 'a'; // Zeilenanfang
 let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
+let spielerID = ""; // vom Server zugewiesen
 
 // Anzahl der Schiffe (mit Feldgröße)
 let schiff2 = 4; // U-Boote
@@ -10,8 +11,11 @@ let schiff3 = 3; // Zerstörer
 let schiff4 = 2; // Kreuzer
 let schiff5 = 1; // Schlachtschiff
 
+// Schiffsammlung (Array)
+let schiffe = [];
+
 // Antwort des Servers
-let antwort
+let antwort = "";
 
 // Startzustand herstellen nach Laden der Seite
 window.addEventListener("load", ladenErfolgreich);
@@ -29,70 +33,11 @@ function timerStarten() // Verbindungsaufbau für Spiel starten
     {
         document.getElementById("spieler").readOnly = true; // Feld für Spielernamen sperren
         document.getElementById("start").removeEventListener("click", timerStarten); // nur 1x Spiel beginnen
-        //setInterval(verbinden, 5000); // alle 5 Sekunden
-        
+        serverAnfrage("beitritt"); // Spielbeitritt
     }
     else
     {
         alert("Spielernamen eingeben!"); // Meldung, dies nachzuholen
-    }
-}
-
-// Spielersuche zum Registrieren in Datei zum Aufbau des Spiels
-function verbinden()
-{
-    console.log(zahler);
-    zahler++;
-
-    // Anfang - Browserweiche
-    try
-    {
-        // Eintrag von Verbindungsdaten in xhttp
-        xhttp = new XMLHttpRequest(); // Firefox
-    }
-    catch (error)
-    {
-        try
-        {
-            xhttp = new ActiveXObject("Msxml2.XMLHTTP"); // Microsoft
-        }
-        catch (error)
-        {
-            try
-            {
-                xhttp = new ActiveXObject("Microsoft.XMLHTTP");
-            }
-            catch (error)
-            {
-                return;
-            }
-        }
-    }
-    // Ende - Browserweiche
-
-    // liest ständig die Rückmeldungen
-    xhttp.onreadystatechange = ajax;
-
-    // Verbindung wird geöffnet mit method="POST"
-    xhttp.open("POST", "script.php");
-
-    // Vorlage für Formular erstellen + Daten mit "append" anheften
-    let formDaten = new FormData();
-    formDaten.append("spieler", document.getElementById("spieler").value);
-
-    // Anfrage wird gesendet
-    xhttp.send(formDaten);
-}
-
-// Antwort des php-Skripts
-
-function ajax()
-{
-    // readyState = 4 -> Rückmeldung vollständig ; status = 200 -> Rückmeldung fehlerfrei
-    if (this.readyState == 4 && this.status == 200)
-    {
-        antwort = this.responseText;
-        // function für weiteren Ablauf
     }
 }
 
@@ -197,13 +142,6 @@ function feldauswahl()
 
         spieleraktion = ""; // Spieleraktion wird zurückgesetzt (1. klick)
     }
-}
-
-// Logik der Spielzüge
-
-function spielzug()
-{
-    console.log(this.id);
 }
 
 // Korrektur der berechneten Schiffslänge
@@ -390,7 +328,7 @@ function platziereSchiff(start, wert, ausrichtung)
 
         if (check) // wenn frei
         {
-            switch (wert) // Schiff entnehmen für Platzierung
+            switch (wert) // Schiff entnehmen für Platzierung & Schiffanzeige aktualisieren
             {
                 case 5:
                     schiff5--;
@@ -408,12 +346,20 @@ function platziereSchiff(start, wert, ausrichtung)
                     schiff2--;
                     document.getElementById("schiff2").innerHTML = parseInt(document.getElementById("schiff2").innerHTML) + 1;
             }
+
+            let array = []; // für IDs aller Flächen eines Schiffes ohne spieler. Zusatz
+
             for (const element of schiffsflache) // Schiff platzeren
             {
                 element.innerHTML = "O";
                 element.style.backgroundColor = "grey";
+                let temp = element.id.split("."); // 
+                //console.log(temp[1]); // Testausgabe
+                array.push(temp[1]);
             }
-            document.getElementById("status").innerHTML = schifftyp + " wurde platziert.";
+            document.getElementById("status").innerHTML = schifftyp + " wurde platziert."; // Statusausgabe
+            schiffe.push(array); // Schiffe im Array sammeln
+            //console.log(schiffe); // Testausgabe
 
             // Bereich drumherum sperren
             for (const element of sperrbereich) // Sperrfläche um das Schiff drum herum platzieren
@@ -466,7 +412,7 @@ function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die E
         }
         index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
     }
-    setTimeout(meldungNachPlatzierung, 200); // damit Meldung erst nach den platzieren des letzten Schiffs auftaucht (200ms)
+    setTimeout(meldungNachPlatzierung, 200); // damit Meldung erst nach den platzieren des letzten Schiffs auftaucht (200ms Verzögerung)
 }
 
 function meldungNachPlatzierung() // gibt die Bestätigung für den Spieler aus, dass alle Schiffe platziert wurden.
@@ -514,9 +460,98 @@ function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeiche
             let idFeldGegner = "gegner." + index + zahl;
             //console.log(idFeld); // id-Ausgabe zum Test
             document.getElementById(idFeldSpieler).innerHTML = "W"; // Wasserzeichen
-            document.getElementById(idFeldGegner).innerHTML = "?"; // unbekannt
+            document.getElementById(idFeldGegner).innerHTML = "?"; // unbekannte Gegnerflächen
             //console.log("idFeld remove: " + idFeld);
         }
         index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
     }
 }
+
+// Spielersuche zum Registrieren in Datei zum Aufbau des Spiels
+function serverAnfrage(grund)
+{
+    console.log(zahler);
+    zahler++;
+
+    // Anfang - Browserweiche
+    try
+    {
+        // Eintrag von Verbindungsdaten in xhttp
+        xhttp = new XMLHttpRequest(); // Firefox
+    }
+    catch (error)
+    {
+        try
+        {
+            xhttp = new ActiveXObject("Msxml2.XMLHTTP"); // Microsoft
+        }
+        catch (error)
+        {
+            try
+            {
+                xhttp = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+            catch (error)
+            {
+                return;
+            }
+        }
+    }
+    // Ende - Browserweiche
+
+    // liest ständig die Rückmeldungen
+    xhttp.onreadystatechange = ajax;
+
+    // Verbindung wird geöffnet mit method="POST"
+    xhttp.open("POST", "script.php");
+
+    if (grund === "beitritt")
+    {
+        verbinden(); // Abfragen ob Spielzug/Verbinden
+    }
+}
+
+function ajax() // Antwort des php-Skripts
+{
+    // readyState = 4 -> Rückmeldung vollständig ; status = 200 -> Rückmeldung fehlerfrei
+    if (this.readyState == 4 && this.status == 200)
+    {
+        antwort = this.responseText;
+        console.log(antwort); // Testausgabe
+        // function für weiteren Ablauf
+    }
+}
+
+function verbinden()
+{
+    document.getElementById("status").innerHTML = "Spielbeitritt erfolgt...";
+
+    // Vorlage für Formular erstellen + Daten mit "append" anheften
+    let formDaten = new FormData();
+
+    let jsonString = JSON.stringify(schiffe); // JSON String generieren
+    formDaten.append("spieler", document.getElementById("spieler").value);
+    formDaten.append("aufstellung", jsonString); // JSON String mitschicken
+    //console.log(jsonString); // Testausgabe
+
+    // Anfrage wird gesendet
+    xhttp.send(formDaten);
+
+    // Timer starten zur Abfrage ob Spieler 2 beigetreten ist
+    setInterval(beitrittsabfrage, 5000); // alle 5 Sekunden
+}
+
+function beitrittsabfrage()
+{
+    console.log("HI: "+zahler);
+    //serverAnfrage(grund);
+}
+
+// Logik der Spielzüge
+
+function spielzug()
+{
+    console.log(this.id);
+}
+
+
