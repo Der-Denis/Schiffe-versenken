@@ -4,6 +4,7 @@ let anzahl = 10; // für Zeilen & Spalten
 let index = 'a'; // Zeilenanfang
 let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
 let spielerID = ""; // vom Server zugewiesen
+let grund = ""; // Zweck der Abfrage an den Server
 
 // Anzahl der Schiffe (mit Feldgröße)
 let schiff2 = 4; // U-Boote
@@ -33,7 +34,8 @@ function timerStarten() // Verbindungsaufbau für Spiel starten
     {
         document.getElementById("spieler").readOnly = true; // Feld für Spielernamen sperren
         document.getElementById("start").removeEventListener("click", timerStarten); // nur 1x Spiel beginnen
-        serverAnfrage("beitritt"); // Spielbeitritt
+        grund = "beitritt";
+        serverAnfrage(); // Spielbeitritt
     }
     else
     {
@@ -468,7 +470,7 @@ function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeiche
 }
 
 // Spielersuche zum Registrieren in Datei zum Aufbau des Spiels
-function serverAnfrage(grund)
+function serverAnfrage()
 {
     console.log(zahler);
     zahler++;
@@ -519,10 +521,30 @@ function ajax() // Antwort des php-Skripts
         antwort = this.responseText;
         console.log(antwort); // Testausgabe
         // function für weiteren Ablauf
+        if (grund === "beitritt")
+        {
+            antwortbearbeitungBeitrittsanfrage(antwort);
+        }
+
     }
 }
 
-function verbinden()
+function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beitritt
+{
+    let check = antwort.split(" ");
+    if (check[1] === "registriert") // Registrierung für Spiel erfolgreich
+    {
+        // Timer starten zur Abfrage ob Spieler 2 beigetreten ist
+        setInterval(beitrittsabfrage, 5000); // alle 5 Sekunden
+    }
+    else
+    {
+        alert(antwort); // Meldung: Spiel bereits im Gange.
+    }
+
+}
+
+function verbinden() // Spielbeitrittsversuch
 {
     document.getElementById("status").innerHTML = "Spielbeitritt erfolgt...";
 
@@ -536,14 +558,11 @@ function verbinden()
 
     // Anfrage wird gesendet
     xhttp.send(formDaten);
-
-    // Timer starten zur Abfrage ob Spieler 2 beigetreten ist
-    setInterval(beitrittsabfrage, 5000); // alle 5 Sekunden
 }
 
 function beitrittsabfrage()
 {
-    console.log("HI: "+zahler);
+    console.log("HI: " + zahler);
     //serverAnfrage(grund);
 }
 
