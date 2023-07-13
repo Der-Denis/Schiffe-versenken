@@ -5,6 +5,7 @@ let index = 'a'; // Zeilenanfang
 let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
 let spielerID = ""; // vom Server zugewiesen
 let grund = ""; // Zweck der Abfrage an den Server
+let intervall = null;
 
 // Anzahl der Schiffe (mit Feldgröße)
 let schiff2 = 1; // U-Boote
@@ -472,7 +473,7 @@ function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeiche
 // Spielersuche zum Registrieren in Datei zum Aufbau des Spiels
 function serverAnfrage()
 {
-    console.log(zahler);
+    //console.log(zahler); // Testausgabe
     zahler++;
 
     // Anfang - Browserweiche
@@ -513,7 +514,7 @@ function serverAnfrage()
     }
     else if (grund === "beitrittsabfrage")
     {
-
+        beitrittsabfrage();
     }
 }
 
@@ -527,7 +528,11 @@ function ajax() // Antwort des php-Skripts
         // function für weiteren Ablauf
         if (grund === "beitritt")
         {
-            antwortbearbeitungBeitrittsanfrage(antwort);
+            antwortbearbeitungBeitrittsanfrage(antwort); // Spieler will sich registrieren
+        }
+        else if (grund === "beitrittsabfrage")
+        {
+            anwortbearbeitungBeitrittsabfrage(antwort); // Spieler1 fragt nach Spieler2
         }
 
     }
@@ -538,6 +543,7 @@ function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beit
     // gesplittetes Array. Übergabe: Spieler1 registriert. oder Spieler2 registriert. Gegner: [Spieler2 Name]
     let check = antwort.split(" ");
     spielerID = check[0];
+    //console.log("antwortbearbeitungBeitrittsanfrage"); // Testausgabe
     if (check[1] === "registriert.") // Registrierung für Spiel erfolgreich
     {
         // Timer starten zur Abfrage ob Spieler 2 beigetreten ist
@@ -550,10 +556,11 @@ function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beit
             // direkt Abfrage, ob er dran ist.......... -> token
 
         }
-        else // Abfrage, ob Gegner 2 beigetreten ist
+        else // regelmäßige Abfrage, ob Gegner 2 beigetreten ist in Gang setzen
         {
+            console.log("antwortbearbeitungBeitrittsanfrage: " + zahler); // Testausgabe
             grund = "beitrittsabfrage";
-            setInterval(beitrittsabfrage, 5000); // alle 5 Sekunden
+            intervall = setIntervall(beitrittsabfrage, 5000); // alle 5 Sekunden
         }
     }
     else // Registrierung fehlgeschlagen
@@ -580,10 +587,29 @@ function verbinden() // Spielbeitrittsversuch
     xhttp.send(formDaten);
 }
 
-function beitrittsabfrage()
+function beitrittsabfrage() // alle 5 Sekunden
 {
-    console.log("BeitrittsanfrageNR: " + zahler);
-    serverAnfrage();
+     // Daten mitschicken --> FOOOORM - siehe oben
+
+    let intervallMax = 6;
+    //console.log("BeitrittsanfrageNR: " + zahler); // Testausgabe
+    //serverAnfrage(); // Blödsinn !!!
+    /* if (zahler > intervallMax) // 60 * 5 = 300 Sekunden max. Wartezeit
+    {
+        clearInterval(intervall);
+    } */
+}
+
+function anwortbearbeitungBeitrittsabfrage(antwort)
+{
+    if (antwort !== "")
+    {
+        //clearInterval(intervall);
+    }
+    else
+    {
+        //setTimeout(beitrittsabfrage, 5000); // Test
+    }
 }
 
 // Logik der Spielzüge
