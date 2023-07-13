@@ -12,6 +12,16 @@
     {
         registrierung($datei);
     }
+    else if($_POST["spielzug"] !== null) # Spielzug setzen
+    {
+        
+    }
+    else #Spieler1 will Spieler2 Namen ODER tokenabfrage
+    {
+        $spieldaten = file_get_contents($datei); # Dateiauslesen
+        $json = json_decode($spieldaten); # JSON String decodieren -> Objekt
+        echo $json->spieler2; # Spieler2 zurückgeben (Namen)
+    }
     
     function registrierung($datei) # Registrierung in spiel.json - Datei
     {
@@ -22,7 +32,7 @@
             $json = json_encode($spiel); # JSON String generieren
             #print_r($spiel); # Testausgabe
             file_put_contents($datei, $json); # in Datei schreiben
-            echo "Spieler1 registriert"; # Ausgabe für JS
+            echo "Spieler1 registriert."; # Ausgabe für JS
         }
         else # Spieler2 will sich registrieren
         {
@@ -42,13 +52,12 @@
                 $spiel->spieler2 = $_POST["spieler"];
                 $json = json_decode($_POST["aufstellung"]); # String in Array umwandeln
                 $spiel->aufstellung2 = $json; # Array eintragen
-                $json = json_encode($spiel); # JSON String generieren
                 #print_r($spiel); # Testausgabe
-                file_put_contents($datei, $json); # in Datei schreiben
-                echo "Spieler2 registriert;"; # Ausgabe für JS
-                echo $spiel->spieler1; # Spieler 1 braucht Info über Spieler 2 !!!
-
-                if(rand(0,1) === 0) # Testen
+                echo "Spieler2 registriert. Gegner: "; # Ausgabe für JS
+                echo $spiel->spieler1; # Spieler 1 braucht Info über Spieler 2 !!! -> JS
+                #$spiel->token = "test123"; # Testeintrag in JSON
+                
+                if(rand(0,1) === 0) # Zufallsentscheid, wer anfängt von 0 bis 1 (Ganzzahl)
                 {
                     $spiel->token=$spiel->spieler1;
                 }
@@ -56,6 +65,9 @@
                 {
                     $spiel->token=$spiel->spieler2;
                 }
+                $spiel->token.=";"; // danach kommt letzter gemachter Zug
+                $json = json_encode($spiel); # JSON String generieren
+                file_put_contents($datei, $json); # in Datei schreiben
                 #echo rand(0,1); # Spieler bestimmen der anfängt
             }
         }
@@ -65,7 +77,7 @@
     {
         public $spieler1;
         public $spieler2;
-        public $token; # welcher Spieler ist dran.
+        public $token; # 1. Stelle: Spieler der dran ist; 2. Stelle: letzter Spielzug ("Spieler1" oder "Spieler2" -> IDs)
         public $aufstellung1;
         public $aufstellung2;
 

@@ -7,10 +7,10 @@ let spielerID = ""; // vom Server zugewiesen
 let grund = ""; // Zweck der Abfrage an den Server
 
 // Anzahl der Schiffe (mit Feldgröße)
-let schiff2 = 4; // U-Boote
-let schiff3 = 3; // Zerstörer
-let schiff4 = 2; // Kreuzer
-let schiff5 = 1; // Schlachtschiff
+let schiff2 = 1; // U-Boote
+let schiff3 = 0; // Zerstörer
+let schiff4 = 0; // Kreuzer
+let schiff5 = 0; // Schlachtschiff
 
 // Schiffsammlung (Array)
 let schiffe = [];
@@ -373,7 +373,7 @@ function platziereSchiff(start, wert, ausrichtung)
 
             if (schiff5 === 0 && schiff4 === 0 && schiff3 === 0 && schiff2 === 0) // Abfrage ob Schiffe übrig zum platzieren
             {
-                wasser();
+                wasser(); // alle Schiffe wurden platziert
             }
 
         }
@@ -511,6 +511,10 @@ function serverAnfrage()
     {
         verbinden(); // Abfragen ob Spielzug/Verbinden
     }
+    else if (grund === "beitrittsabfrage")
+    {
+
+    }
 }
 
 function ajax() // Antwort des php-Skripts
@@ -531,14 +535,30 @@ function ajax() // Antwort des php-Skripts
 
 function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beitritt
 {
+    // gesplittetes Array. Übergabe: Spieler1 registriert. oder Spieler2 registriert. Gegner: [Spieler2 Name]
     let check = antwort.split(" ");
-    if (check[1] === "registriert") // Registrierung für Spiel erfolgreich
+    spielerID = check[0];
+    if (check[1] === "registriert.") // Registrierung für Spiel erfolgreich
     {
         // Timer starten zur Abfrage ob Spieler 2 beigetreten ist
-        setInterval(beitrittsabfrage, 5000); // alle 5 Sekunden
+        //console.log("Check: "+check); // Testausgabe
+
+        if (check.length > 2) // Registrierung für Spieler2 erfolgt
+        {
+            document.getElementById("gegner").value = check[check.length - 1]; // Spieler2 eintragen
+            alert("Spieler " + check[check.length - 1] + " ist dem Spiel beigetreten."); // Statusmeldung
+            // direkt Abfrage, ob er dran ist.......... -> token
+
+        }
+        else // Abfrage, ob Gegner 2 beigetreten ist
+        {
+            grund = "beitrittsabfrage";
+            setInterval(beitrittsabfrage, 5000); // alle 5 Sekunden
+        }
     }
-    else
+    else // Registrierung fehlgeschlagen
     {
+        document.getElementById("status").innerHTML = "Spielbeitritt nicht möglich.";
         alert(antwort); // Meldung: Spiel bereits im Gange.
     }
 
@@ -562,8 +582,8 @@ function verbinden() // Spielbeitrittsversuch
 
 function beitrittsabfrage()
 {
-    console.log("HI: " + zahler);
-    //serverAnfrage(grund);
+    console.log("BeitrittsanfrageNR: " + zahler);
+    serverAnfrage();
 }
 
 // Logik der Spielzüge
