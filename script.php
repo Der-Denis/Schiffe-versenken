@@ -72,7 +72,7 @@
                 {
                     $spiel->token="Spieler2"; # ID 1. Spieler
                 }
-                $spiel->token.=";"; // danach kommt letzter gemachter Zug, bei Erstzug leer
+                $spiel->token.=";"; # danach kommt letzter gemachter Zug, bei Erstzug leer
                 echo $spiel->token;
                 $json = json_encode($spiel); # JSON String generieren
                 file_put_contents($datei, $json); # in Datei schreiben

@@ -703,7 +703,7 @@ function sendeSpielzug()
     xhttp.send(formDaten);
 }
 
-function antwortSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, (T)reffer oder sogar (V)ersenkt
+function antwortbearbeitungSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, (T)reffer oder sogar (V)ersenkt
 {
     console.log(antwort); // Testausgabe
     // Feedback vom Server
