@@ -11,7 +11,7 @@ let eintrag = ""; // Feld ID vom Spielzug
 
 // Anzahl der Schiffe (mit Feldgröße)
 let schiff2 = 1; // U-Boote
-let schiff3 = 0; // Zerstörer
+let schiff3 = 1; // Zerstörer
 let schiff4 = 0; // Kreuzer
 let schiff5 = 0; // Schlachtschiff
 
@@ -29,6 +29,7 @@ function ladenErfolgreich()
     vorbereiten("spieler", feldauswahl); // was soll vorbereitet werden? "feldauswahl" / "spielzug" + welches Feld
     //vorbereiten("gegner", spielzug); // Testaufruf zur Überprüfung
     vorbereitenFelder();
+    document.getElementById("status").innerHTML = "Schiffe platzieren.";
 }
 
 function timerStarten() // Verbindungsaufbau für Spiel starten
@@ -511,6 +512,8 @@ function serverAnfrage()
     // Verbindung wird geöffnet mit method="POST"
     xhttp.open("POST", "script.php");
 
+    console.log("Grund der Serveranfrage: " + grund); // Testausgabe
+
     if (grund === "beitritt") // Abfrage für Grund
     {
         verbinden(); // Versuch sich für Spiel zu registrieren
@@ -527,6 +530,7 @@ function serverAnfrage()
     else if (grund === "spielzug")
     {
         // Inhalt
+        sendeSpielzug();
     }
 }
 
@@ -536,7 +540,7 @@ function ajax() // Antwort des php-Skripts
     if (this.readyState == 4 && this.status == 200)
     {
         antwort = this.responseText;
-        console.log("Test" + antwort); // Testausgabe
+        console.log("Testantwort: " + antwort); // Testausgabe
         // function für weiteren Ablauf
         if (grund === "beitritt")
         {
@@ -548,12 +552,12 @@ function ajax() // Antwort des php-Skripts
         }
         else if (grund === "token")
         {
-            schauToken(antwort);
+            antwortbearbeitungTokenAbfrage(antwort);
             //console.log("Hab ich Token?"); // Testausgabe
         }
         else if (grund === "spielzug")
         {
-            // hier was rein
+            antwortbearbeitungSendeSpielzug(antwort);
         }
     }
 }
@@ -583,12 +587,13 @@ function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beit
             {
                 console.log("Ich hab Token."); // Testausgabe
                 grund = "spielzug";
-                document.getElementById("status").innerHTML = "Spielzug erwartet.";
+                document.getElementById("status").innerHTML = "Spielzug erwartet."; // Statusmeldung -> Spieler ist dran
             }
             else // Timer für Abfrage ob Token
             {
-                grund = "token"; // Testen
+                grund = "token";
                 intervall = setInterval(serverAnfrage, abfrageZeit);
+                document.getElementById("status").innerHTML = "Warten auf gegnerischen Spielzug..."; // Statusmeldung -> Spieler ist nicht dran
             }
 
         }
@@ -638,6 +643,7 @@ function anwortbearbeitungBeitrittsabfrage(antwort) // Überprüfung ob Spieler2
     console.log("Beitritt: " + antwort);
     if (antwort !== "") // nur wenn Spieler2 eingetragen ist
     {
+        document.getElementById("status").innerHTML = "Warten auf Spielzug...";
         document.getElementById("gegner").value = antwort; // Gegner für Spieler1 eintragen
         grund = "token"; // ob Spieler dran ist
         //clearInterval(intervall); // nur wenn Spieler dran ist....
@@ -654,14 +660,71 @@ function tokenAbfrage() // Sende Anfrage an Token
     xhttp.send(formDaten);
 }
 
-function schauToken(antwort) // Überprüfung, ob eigener Token
+function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener Token
 {
     let temp = antwort.split(";"); // Seperatisieren von Token & letzter Spielzug
     console.log("Token: " + temp[0]); // Testausgabe
-    if (temp[0] === spielerID)
+    console.log("ID Feld: " + temp[1]);
+    if (temp[0] === spielerID) // Eigener Token
     {
+        document.getElementById("status").innerHTML = "Spielzug erwartet.";
         clearInterval(intervall); // Intervall entfernen, da Spieler mit Spielzug dran ist
         grund = "spielzug"; // nächste serverAnfrage hat den grund für spielzug
+
+        //console.log("A"+temp[1]+"B"); // Testausgabe
+        if (temp[1] !== "") // Abfangen vom Erstzug von Spieler1
+        {
+            console.log(schiffe); // Testausgabe
+            for(let schiff in schiffe)
+            {
+                console.log(schiff); // Testausgabe
+            }
+            // unten löschen wenn fertig
+            /* 
+            $leer=true;
+        foreach($schiffsammlung as &$schiff) # & => Referenz
+        {
+            foreach($schiff as &$feld)  # & => Referenz
+            {
+                if(($treffer = array_search($spielzug, $schiff)) !== false) # prüfen ob getroffen; übergebe Array-Index -> $treffer
+                {
+                    #$temp = $schiff; # Kopie vor Änderung
+                    #print_r($schiff); # Testausgabe
+                    #echo "Treffer: ".$treffer;
+                    unset($schiff[$treffer]); # Feld aus Schiff-Array nehmen
+                    $schiff=array_values($schiff); # Entfernen von Index (alle)
+                    $status="T"; # (T)reffer
+
+                    if(count($schiff)===0) # prüfen ob keine mehr beschießbaren Felder
+                    {
+                        $status="V"; # (V)ersenkt
+                    }
+                    #print_r($schiff); # Testausgabe
+                }
+            }
+            if($leer) # solange leer ist überprüfe, ob Schiff leer
+            {
+                $leer=empty($schiff);
+            }
+            #print_r($schiffsammlung); # Testausgabe
+        }
+
+        if($leer)
+        {
+            $status="G"; # (G)ewonnen
+        }
+            */
+            // gegnerischer Spielzug verarbeiten
+            if (document.getElementById("spieler." + temp[1]).innerHTML === "W")
+            {
+                document.getElementById("spieler." + temp[1]).style.backgroundColor = "yellow"; // wenn Schuss auf Wasser, dann Gelb
+            }
+            else if (document.getElementById("spieler." + temp[1]).innerHTML === "O")
+            {
+                document.getElementById("spieler." + temp[1]).style.backgroundColor = "red"; // wenn Treffer eines Schiffes, dann Gelb
+            }
+            document.getElementById("spieler." + temp[1]).innerHTML = "X"; // Treffer markieren auf eigenem Spielfeld
+        }
     }
 }
 
@@ -677,8 +740,8 @@ function spielzug() // beim Klick auf gegnerisches Spielfeld
         {
             let temp = id.split("."); // gegnerID aufteilen
             eintrag = temp[1]; // Feldkoordinate des gegnerischen Spielfeldes (ID)
+            document.getElementById(id).innerHTML = "X";
             serverAnfrage();
-            grund = "token"; // danach die nächste serverAnfrage nach token
             intervall = setInterval(serverAnfrage, abfrageZeit);
         }
         else // Feld bereits beschossen
@@ -694,6 +757,7 @@ function spielzug() // beim Klick auf gegnerisches Spielfeld
 
 function sendeSpielzug()
 {
+    console.log("Spielzug wird gesendet.");
     let formDaten = new FormData();
 
     formDaten.append("spielerID", spielerID); // übergeben ID
@@ -703,9 +767,75 @@ function sendeSpielzug()
     xhttp.send(formDaten);
 }
 
-function antwortbearbeitungSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, (T)reffer oder sogar (V)ersenkt
+function antwortbearbeitungSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, (T)reffer, (V)ersenkt oder sogar (G)ewonnen
 {
-    console.log(antwort); // Testausgabe
-    // Feedback vom Server
-    /* Hier bekommt man Meldung und muss ins gegnerisches Spielfeld eingetragen werden */
+    switch (antwort)
+    {
+        case "W":
+            document.getElementById("status").innerHTML = "Schuss ging ins Wasser."; // Statusmeldung -> (W)asser!
+            document.getElementById("gegner." + eintrag).innerHTML = "W"; // Wasserzeichen
+            document.getElementById("gegner." + eintrag).style.backgroundColor = "aqua"; // Wasserfarbe
+            break;
+        case "T":    
+            document.getElementById("status").innerHTML = "Gegnerisches Schiff getroffen!"; // Statusmeldung -> (T)reffer!
+            document.getElementById("gegner." + eintrag).innerHTML = "T"; // Trefferzeichen
+            document.getElementById("gegner." + eintrag).style.backgroundColor = "red"; // Treffermarkierung
+            break;
+        case "V":
+            document.getElementById("status").innerHTML = "Gegnerisches Schiff versenkt!"; // Statusmeldung -> (V)ersenkt!
+            document.getElementById("gegner." + eintrag).innerHTML = "V"; // Versenktzeichen
+            document.getElementById("gegner." + eintrag).style.backgroundColor = "red"; // Treffermarkierung
+            break;
+        case "G":
+            document.getElementById("status").innerHTML = "Alle gegnerischen Schiffe wurden versenkt!"; // Statusmeldung -> (G)ewonnen!
+            document.getElementById("gegner." + eintrag).innerHTML = "V"; // Versenktzeichen
+            document.getElementById("gegner." + eintrag).style.backgroundColor = "red"; // Treffermarkierung
+            aufdecken(); // restliche Felder mit Wasser befüllen
+            clearInterval(intervall); // Stop der Anfragen, da Spiel vorbei.
+            setTimeout(meldungSieg, 200); // damit Meldung erst nach der Eintragung auftritt (200ms Verzögerung)
+            //console.log("Spielende."); // Testausgabe
+    }
+    if(antwort!=="G") // wenn Spiel weitergeht
+    {
+        // Rückmeldung des Servers bezüglich (W)asser / (T)reffer / (V)ersenkt / (G)ewonnen verarbeiten
+        grund = "token"; // danach die nächste serverAnfrage nach token
+        const aktion = antwort.split("."); // ID aufteilen
+        setTimeout(meldungWarten, abfrageZeit); // damit Statuseldung erst nach der Statusmeldung des Spielzuges auftritt (5000ms Verzögerung)
+    
+        //console.log("antwortbearbeitungSendeSpielzug: " + antwort); // Testausgabe
+    }
+}
+
+function meldungSieg() // Verzögerte Meldung des Sieges damit Markierung zuerst erfolgt
+{
+    alert("Spiel gewonnen!");
+}
+
+function meldungWarten()
+{
+    document.getElementById("status").innerHTML = "Warten auf gegnerischen Spielzug..."; // Statusmeldung -> Spieler ist nicht dran
+}
+
+function aufdecken() // alle restlichen Wasserfelder anzeigen (Spielfeld -> Gegner)
+{
+    //console.log("Wasser wird verschüttet..."); // Testausgabe
+    index = 'a'; // Zurücksetzen des Indexes
+
+    // Für jede Reihe ( A - J )
+    for (let zahlReihe = 1; zahlReihe <= anzahl; zahlReihe++)
+    {
+        // jeweilige Reihe
+        for (let zahl = 1; zahl <= anzahl; zahl++)
+        {
+            //console.log("Index: "+index); // Testausgabe
+            let idFeld = "gegner." + index + zahl;
+            //console.log(idFeld); // id-Ausgabe zum Test
+            if(document.getElementById(idFeld).innerHTML === "?")
+            {
+                document.getElementById(idFeld).innerHTML = "W"; // Wasserzeichen
+                document.getElementById(idFeld).style.backgroundColor = "aqua";
+            }
+        }
+        index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
+    }
 }

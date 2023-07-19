@@ -15,7 +15,36 @@
     else if(isset($_POST["spielzug"])) # Spielzug setzen
     {
         # echo mit Trefferinformation
-        echo $_POST["spielzug"]; # Testausgabe
+        #echo "Spielzug: ".$_POST["spielzug"]."\n"; # Testausgabe
+        $spieldaten = file_get_contents($datei); # Dateiauslesen
+        $json = json_decode($spieldaten); # JSON String decodieren -> Objekt
+        $spiel = new Spiel($json->spieler1, $json->spieler2, $json->token, $json->aufstellung1, $json->aufstellung2); # Spielobjekt neu erzeugt mit Parametern
+        $check = explode(";",$spiel->token);
+        $auswertung; # Speicherung der Rückmeldung an Spielerzug
+        if($check[0]==="Spieler1") # Spieler1 dran -> wechseln
+        {
+            #echo $_POST["spielzug"].$_POST["spielerID"]."???\n"; # Testausgabe
+            #$array = $spiel->aufstellung2;
+            #print_r($array); # Testausgabe
+            #echo $_POST["spielzug"];
+            $spiel->token="Spieler2"; # Wechsel des Tokens an ID 2. Spieler
+        }
+        else if($check[0]==="Spieler2") # Spieler2 dran -> wechseln
+        {
+            #echo $_POST["spielzug"].$_POST["spielerID"]."!!!\n"; # Testausgabe
+            #$array = $spiel->aufstellung1;
+            #print_r($array); # Testausgabe
+            #echo $_POST["spielzug"];
+            $spiel->token="Spieler1"; # Wechsel des Tokens an ID 1. Spieler
+        }
+        $auswertung = auswerten($_POST["spielerID"],$_POST["spielzug"], $spiel, $datei); # Arraybearbeitung
+        $spiel->token.=";".$_POST["spielzug"];
+        echo $auswertung;
+        #echo "Spielzug erfolgt."; # Testausgabe
+        # Auswertung ob (W)asser / (T)reffer / (V)ersenkt
+
+        $json = json_encode($spiel); # JSON String generieren
+        file_put_contents($datei, $json); # in Datei schreiben
     }
     else if (isset($_POST["spielerID"])) # Tokenabfrage
     {
@@ -52,7 +81,6 @@
             if($json->spieler2 !== null)
             {
                 echo "Spiel bereits im Gange."; # Ausgabe für JS
-                return;
             }
             else
             {
@@ -70,9 +98,10 @@
                 }
                 else
                 {
-                    $spiel->token="Spieler2"; # ID 1. Spieler
+                    $spiel->token="Spieler2"; # ID 2. Spieler
                 }
                 $spiel->token.=";"; # danach kommt letzter gemachter Zug, bei Erstzug leer
+
                 echo $spiel->token;
                 $json = json_encode($spiel); # JSON String generieren
                 file_put_contents($datei, $json); # in Datei schreiben
@@ -91,12 +120,77 @@
 
         function __construct($spieler1, $spieler2, $token, $aufstellung1, $aufstellung2)
         {
-            $this->spieler1 = $spieler1;
-            $this->spieler2 = $spieler2;
+            $this->spieler1 = $spieler1; # Spielername
+            $this->spieler2 = $spieler2; # Spielername
             $this->token = $token;
-            $this->aufstellung1 = $aufstellung1;
-            $this->aufstellung2 = $aufstellung2;
+            $this->aufstellung1 = $aufstellung1; # Schiffe
+            $this->aufstellung2 = $aufstellung2; # Schiffe
         }
+    }
+
+    function auswerten($SID,$spielzug,$spiel,$datei) # SID = spielerID
+    {
+        # Logik mit return der Meldung
+        #echo "Spielzug: ".$spielzug;
+        #print_r($schiffsammlung);
+        $status="W"; # (W)asser
+        $schiffsammlung;
+
+        if($SID==="Spieler1")  # Spieler1 schießt auf Aufstellung von Spieler2
+        {
+            $schiffsammlung=$spiel->aufstellung2;
+        }
+        else # Spieler2 schießt auf Aufstellung von Spieler1
+        {
+            $schiffsammlung=$spiel->aufstellung1;
+        }
+
+        $leer=true;
+        foreach($schiffsammlung as &$schiff) # & => Referenz
+        {
+            foreach($schiff as &$feld)  # & => Referenz
+            {
+                if(($treffer = array_search($spielzug, $schiff)) !== false) # prüfen ob getroffen; übergebe Array-Index -> $treffer
+                {
+                    #$temp = $schiff; # Kopie vor Änderung
+                    #print_r($schiff); # Testausgabe
+                    #echo "Treffer: ".$treffer;
+                    unset($schiff[$treffer]); # Feld aus Schiff-Array nehmen
+                    $schiff=array_values($schiff); # Entfernen von Index (alle)
+                    $status="T"; # (T)reffer
+
+                    if(count($schiff)===0) # prüfen ob keine mehr beschießbaren Felder
+                    {
+                        $status="V"; # (V)ersenkt
+                    }
+                    #print_r($schiff); # Testausgabe
+                }
+            }
+            if($leer) # solange leer ist überprüfe, ob Schiff leer
+            {
+                $leer=empty($schiff);
+            }
+            #print_r($schiffsammlung); # Testausgabe
+        }
+
+        if($leer)
+        {
+            $status="G"; # (G)ewonnen
+        }
+
+        if($SID==="Spieler1") # Aktualisierung der Schiffsammlung Spieler2
+        {
+            $spiel->aufstellung2=$schiffsammlung;
+        }
+        else # Aktualisierung der Schiffsammlung Spieler1
+        {
+            $spiel->aufstellung1=$schiffsammlung;
+        }
+        
+        $json = json_encode($spiel); # JSON String generieren
+        file_put_contents($datei, $json); # in Datei schreiben
+
+        return $status;
     }
 
 ?>
