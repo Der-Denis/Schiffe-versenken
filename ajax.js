@@ -1,19 +1,23 @@
 // Variablen
 let zahler = 0; // Serveranfragen-Zähler für Tests
-let anzahl = 10; // für Zeilen & Spalten
-let index = 'a'; // Zeilenanfang
+let anzahl = 10; // für Zeilen & Spalten -> 10 x 10 = 100 Felder
+let index = 'a'; // Zeilenanfang für Schleifen
 let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
 let spielerID = ""; // vom Server zugewiesen
 let grund = ""; // Zweck der Abfrage an den Server: "beitritt","beitrittsabfrage","token","spielzug"
-let intervall = null;
-let abfrageZeit = 5000; // alle 5 Sekunden
+let intervall = null; // zur Speicherung der ID des Timers
+let abfrageZeit = 5000; // alle 5 Sekunden -> Timer
 let eintrag = ""; // Feld ID vom Spielzug
 
+// für Statistik
+let zuganzahl = 0; // Gesamanzahl der eigenen gemachten Spielzüge
+let treffer = 0; // Anzahl der Treffer der eigenen Spielzüge
+
 // Anzahl der Schiffe (mit Feldgröße)
-let schiff2 = 1; // U-Boote
-let schiff3 = 1; // Zerstörer
-let schiff4 = 0; // Kreuzer
-let schiff5 = 0; // Schlachtschiff
+let schiff2 = 4; // U-Boote
+let schiff3 = 3; // Zerstörer
+let schiff4 = 2; // Kreuzer
+let schiff5 = 1; // Schlachtschiff
 
 let schiffe = []; // Schiffsammlung (Array)
 let schifflange = []; // Schifflänge für die Schiffanzeige -> Zuordnung zu "schiffe"
@@ -25,11 +29,16 @@ let antwort = "";
 window.addEventListener("load", ladenErfolgreich);
 function ladenErfolgreich()
 {
-    //document.getElementById("start").addEventListener("click", timerStarten); // Timer setzen // Testaufruf zur Überprüfung
+    document.getElementById("start").addEventListener("click", meldungPlatzierung); // Meldung an Spieler, da Schiffe nicht platziert
     vorbereiten("spieler", feldauswahl); // was soll vorbereitet werden? "feldauswahl" / "spielzug" + welches Feld
     //vorbereiten("gegner", spielzug); // Testaufruf zur Überprüfung
     vorbereitenFelder();
     document.getElementById("status").innerHTML = "Schiffe platzieren.";
+}
+
+function meldungPlatzierung() // Information für Spielstart
+{
+    alert("Es wurden noch nicht alle Schiffe platziert."); // Meldung an Spieler
 }
 
 function timerStarten() // Verbindungsaufbau für Spiel starten
@@ -116,11 +125,11 @@ function feldauswahl()
                 //let temp = null; // temporäres Zahl oder Buchstabe zur Überprüfung (Zeile / Spalte)
 
                 /* Testausgaben zur Fehlerüberprüfung der Logik
-                console.log("Spieleraktion: " + spieleraktion + ", Aktion: " + aktion);
-                console.log("Character: ");
-                console.log(spieleraktion.charAt(0) <= aktion.charAt(0));
-                console.log("Integer: ");
-                console.log(parseInt(spieleraktion.slice(1)) <= parseInt(aktion.slice(1)));
+                //console.log("Spieleraktion: " + spieleraktion + ", Aktion: " + aktion);
+                //console.log("Character: ");
+                //console.log(spieleraktion.charAt(0) <= aktion.charAt(0));
+                //console.log("Integer: ");
+                //console.log(parseInt(spieleraktion.slice(1)) <= parseInt(aktion.slice(1)));
                 */
                 if (spieleraktion.charAt(0) <= aktion.charAt(0) && (parseInt(spieleraktion.slice(1)) <= parseInt(aktion.slice(1))))
                 {
@@ -425,6 +434,7 @@ function wasser() // wandelt Sperrflächen zu Wasserflächen um & entfernt die E
 function meldungNachPlatzierung() // gibt die Bestätigung für den Spieler aus, dass alle Schiffe platziert wurden.
 {
     alert("Es wurden alle Schiffe platziert.");
+    document.getElementById("start").removeEventListener("click", meldungPlatzierung); // Hinweis zur Platzierung der Schiffe entfernen
     document.getElementById("start").addEventListener("click", timerStarten); // Spiel bereit zum Starten -> Verbinden mit Server
 }
 
@@ -455,7 +465,7 @@ function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeiche
 function serverAnfrage()
 {
     zahler++; // AnfrageNr für Tests
-    console.log("Serveranfrage: " + zahler); // Testausgabe
+    //console.log("Serveranfrage: " + zahler); // Testausgabe
 
     // Anfang - Browserweiche
     try
@@ -489,7 +499,7 @@ function serverAnfrage()
     // Verbindung wird geöffnet mit method="POST"
     xhttp.open("POST", "script.php");
 
-    console.log("Grund der Serveranfrage: " + grund); // Testausgabe
+    //console.log("Grund der Serveranfrage: " + grund); // Testausgabe
 
     if (grund === "beitritt") // Abfrage für Grund
     {
@@ -517,7 +527,7 @@ function ajax() // Antwort des php-Skripts
     if (this.readyState == 4 && this.status == 200)
     {
         antwort = this.responseText;
-        console.log("Testantwort: " + antwort); // Testausgabe
+        //console.log("Testantwort: " + antwort); // Testausgabe
         // function für weiteren Ablauf
         if (grund === "beitritt")
         {
@@ -545,7 +555,7 @@ function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beit
     let check = antwort.split(";"); // Trennzeichen ";" -> als Spielername unzulässig
     spielerID = check[0];
     //console.log(spielerID); // Testausgabe
-    console.log("antwortbearbeitungBeitrittsanfrage"); // Testausgabe
+    //console.log("antwortbearbeitungBeitrittsanfrage"); // Testausgabe
     if (check[1] === "registriert.") // Registrierung für Spiel erfolgreich
     {
         vorbereiten("gegner", spielzug); // Spielzug bereit machen
@@ -558,10 +568,10 @@ function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beit
             document.getElementById("gegner").value = check[check.length - 3]; // Spieler2 eintragen
             alert("Spieler " + check[check.length - 3] + " ist dem Spiel beigetreten."); // Statusmeldung
             // direkt Abfrage, ob er dran ist.......... -> token
-            console.log("Token: " + check[check.length - 2]); // Testausgabe des Tokens, ob Spieler1 oder Spieler2
+            //console.log("Token: " + check[check.length - 2]); // Testausgabe des Tokens, ob Spieler1 oder Spieler2
             if (spielerID === check[check.length - 2]) // ich (Spieler2) hab Token
             {
-                console.log("Ich hab Token."); // Testausgabe
+                //console.log("Ich hab Token."); // Testausgabe
                 grund = "spielzug";
                 document.getElementById("status").innerHTML = "Spielzug erwartet."; // Statusmeldung -> Spieler ist dran
             }
@@ -575,7 +585,7 @@ function antwortbearbeitungBeitrittsanfrage(antwort) // Anfrageverarbeitung Beit
         }
         else // regelmäßige Abfrage, ob Gegner 2 beigetreten ist in Gang setzen
         {
-            console.log("antwortbearbeitungBeitrittsanfrage: " + zahler); // Testausgabe
+            //console.log("antwortbearbeitungBeitrittsanfrage: " + zahler); // Testausgabe
             grund = "beitrittsabfrage";
             intervall = setInterval(serverAnfrage, abfrageZeit); // alle 5 Sekunden
         }
@@ -611,7 +621,7 @@ function beitrittsabfrage() // alle 5 Sekunden bis Spieler2 beigetreten
 
 function anwortbearbeitungBeitrittsabfrage(antwort) // Überprüfung ob Spieler2 beigetreten ist
 {
-    console.log("Beitritt: " + antwort);
+    //console.log("Beitritt: " + antwort);
     if (antwort !== "") // nur wenn Spieler2 eingetragen ist
     {
         document.getElementById("status").innerHTML = "Warten auf Spielzug...";
@@ -634,8 +644,8 @@ function tokenAbfrage() // Sende Anfrage an Token
 function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener Token
 {
     let temp = antwort.split(";"); // Seperatisieren von Token & letzter Spielzug
-    console.log("Token: " + temp[0]); // Testausgabe
-    console.log("ID Feld: " + temp[1]);
+    //console.log("Token: " + temp[0]); // Testausgabe
+    //console.log("ID Feld: " + temp[1]);
     if (temp[0] === spielerID) // Eigener Token
     {
         clearInterval(intervall); // Intervall entfernen, da Spieler mit Spielzug dran ist
@@ -646,7 +656,7 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
         {
             let position = -1; // für das versunkene Schiff im Array der "schifflange"
 
-            console.log("Schiffe: " + schiffe); // Testausgabe
+            //console.log("Schiffe: " + schiffe); // Testausgabe
             for (let schiff in schiffe) // foreach JS Version
             {
                 // "schiff" wird mit Koordinate gefiltert, falls vorhanden
@@ -666,10 +676,10 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
             }
 
             // Testausgaben
-            console.log("Schiffe: ");
-            console.log(schiffe);
-            console.log("Position (Array): " + position);
-            console.log("Länge des Schiffes: " + schifflange[position]);
+            //console.log("Schiffe: ");
+            //console.log(schiffe);
+            //console.log("Position (Array): " + position);
+            //console.log("Länge des Schiffes: " + schifflange[position]);
 
             if (-1 < position) // wenn Position gesetzt (Schiff versunken)
             {
@@ -710,6 +720,7 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
         if (document.getElementById("schiff2").innerHTML === "0" && document.getElementById("schiff3").innerHTML === "0" && document.getElementById("schiff4").innerHTML === "0" && document.getElementById("schiff5").innerHTML === "0")
         {
             aktionEntfernen(); // Entfernen des weiteren Beschusses
+            statistikausgabe(); // Statistik unter Schiffanzeige platzieren
             setTimeout(verlorenMeldung, 200); // Meldung über Niederlage (200 ms Verzögerung)
         }
         else
@@ -719,7 +730,7 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
     }
 }
 
-function verlorenMeldung()
+function verlorenMeldung() // verzögerte Meldung, dass verloren
 {
     document.getElementById("status").innerHTML = "Alle Schiffe verloren!";
     alert("Spiel verloren!");
@@ -734,24 +745,18 @@ function erwarten() // Statusmeldung
 
 function spielzug() // beim Klick auf gegnerisches Spielfeld
 {
-    if (document.getElementById(this.id).innerHTML === "?")
+    if (document.getElementById(this.id).innerHTML === "?") // unbekanntes Feld
     {
         let id = this.id;
-        console.log(id); // Testausgabe
+        //console.log(id); // Testausgabe
         if (grund === "spielzug")
         {
-            if (document.getElementById(id).innerHTML !== "X") // Feld noch nicht beschossen
-            {
-                let temp = id.split("."); // gegnerID aufteilen
-                eintrag = temp[1]; // Feldkoordinate des gegnerischen Spielfeldes (ID)
-                document.getElementById(id).innerHTML = "X";
-                serverAnfrage();
-                intervall = setInterval(serverAnfrage, abfrageZeit);
-            }
-            else // Feld bereits beschossen
-            {
-                alert("Feld bereits beschossen!"); // Meldung an Spieler
-            }
+            zuganzahl++;
+            let temp = id.split("."); // gegnerID aufteilen
+            eintrag = temp[1]; // Feldkoordinate des gegnerischen Spielfeldes (ID)
+            document.getElementById(id).innerHTML = "X";
+            serverAnfrage();
+            intervall = setInterval(serverAnfrage, abfrageZeit);
         }
         else // wartet noch auf eigenen Token
         {
@@ -760,13 +765,13 @@ function spielzug() // beim Klick auf gegnerisches Spielfeld
     }
     else
     {
-        alert("Feld bereits beschossen!");
+        alert("Feld bereits beschossen!"); // Meldung an Spieler
     }
 }
 
 function sendeSpielzug()
 {
-    console.log("Spielzug wird gesendet.");
+    //console.log("Spielzug wird gesendet.");
     let formDaten = new FormData();
 
     formDaten.append("spielerID", spielerID); // übergeben ID
@@ -778,12 +783,14 @@ function sendeSpielzug()
 
 function antwortbearbeitungSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, (T)reffer, (V)ersenkt oder sogar (G)ewonnen
 {
+    treffer++; // Treffer erhöhen -> Code sparen
     switch (antwort)
     {
         case "W":
             document.getElementById("status").innerHTML = "Schuss ging ins Wasser."; // Statusmeldung -> (W)asser!
             document.getElementById("gegner." + eintrag).innerHTML = "W"; // Wasserzeichen
             document.getElementById("gegner." + eintrag).style.backgroundColor = "aqua"; // Wasserfarbe
+            treffer--; // Treffer reduzieren, weil daneben
             break;
         case "T":
             document.getElementById("status").innerHTML = "Gegnerisches Schiff getroffen!"; // Statusmeldung -> (T)reffer!
@@ -800,7 +807,8 @@ function antwortbearbeitungSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, 
             document.getElementById("gegner." + eintrag).innerHTML = "V"; // Versenktzeichen
             document.getElementById("gegner." + eintrag).style.backgroundColor = "red"; // Treffermarkierung
             aufdecken(); // restliche Felder mit Wasser befüllen
-            aktionEntfernen();
+            aktionEntfernen(); // Eventlistener entfernen vom gegnerischen Spielfeld
+            statistikausgabe(); // Statistik unter Schiffanzeige platzieren
             clearInterval(intervall); // Stop der Anfragen, da Spiel vorbei.
             setTimeout(meldungSieg, 200); // damit Meldung erst nach der Eintragung auftritt (200ms Verzögerung)
         //console.log("Spielende."); // Testausgabe
@@ -869,4 +877,12 @@ function aktionEntfernen() // Eventlistener für gegnerisches Spielfeld entferne
         }
         index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
     }
+}
+
+function statistikausgabe()
+{
+    let ausgabe = "<br><br>" + treffer + " Treffer von " + zuganzahl + " Schüssen<br>";
+    ausgabe += "<br>Eigene Trefferquote: " + parseInt(100 * treffer / zuganzahl) + " %";
+
+    document.getElementById("statistik").innerHTML = ausgabe;
 }
