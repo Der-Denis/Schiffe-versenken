@@ -152,9 +152,8 @@
             {
                 if(($treffer = array_search($spielzug, $schiff)) !== false) # prüfen ob getroffen; übergebe Array-Index -> $treffer
                 {
-                    #$temp = $schiff; # Kopie vor Änderung
                     #print_r($schiff); # Testausgabe
-                    #echo "Treffer: ".$treffer;
+                    #echo "Treffer: ".$treffer; # Testazsgabe
                     unset($schiff[$treffer]); # Feld aus Schiff-Array nehmen
                     $schiff=array_values($schiff); # Entfernen von Index (alle)
                     $status="T"; # (T)reffer
