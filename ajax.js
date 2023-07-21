@@ -14,16 +14,13 @@ let zuganzahl = 0; // Gesamanzahl der eigenen gemachten Spielzüge
 let treffer = 0; // Anzahl der Treffer der eigenen Spielzüge
 
 // Anzahl der Schiffe (mit Feldgröße)
-let schiff2 = 4; // U-Boote
-let schiff3 = 3; // Zerstörer
-let schiff4 = 2; // Kreuzer
-let schiff5 = 1; // Schlachtschiff
+let schiff2 = 4; // 4 U-Boote
+let schiff3 = 3; // 3 Zerstörer
+let schiff4 = 2; // 2 Kreuzer
+let schiff5 = 1; // 1 Schlachtschiff
 
 let schiffe = []; // Schiffsammlung (Array)
 let schifflange = []; // Schifflänge für die Schiffanzeige -> Zuordnung zu "schiffe"
-
-// Antwort des Servers
-let antwort = "";
 
 // Startzustand herstellen nach Laden der Seite
 window.addEventListener("load", ladenErfolgreich);
@@ -526,7 +523,7 @@ function ajax() // Antwort des php-Skripts
     // readyState = 4 -> Rückmeldung vollständig ; status = 200 -> Rückmeldung fehlerfrei
     if (this.readyState == 4 && this.status == 200)
     {
-        antwort = this.responseText;
+        let antwort = this.responseText;
         //console.log("Testantwort: " + antwort); // Testausgabe
         // function für weiteren Ablauf
         if (grund === "beitritt")
@@ -817,7 +814,6 @@ function antwortbearbeitungSendeSpielzug(antwort) // Rückmeldung, ob (W)asser, 
     {
         // Rückmeldung des Servers bezüglich (W)asser / (T)reffer / (V)ersenkt / (G)ewonnen verarbeiten
         grund = "token"; // danach die nächste serverAnfrage nach token
-        const aktion = antwort.split("."); // ID aufteilen
         setTimeout(meldungWarten, abfrageZeit); // damit Statuseldung erst nach der Statusmeldung des Spielzuges auftritt (5000ms Verzögerung)
 
         //console.log("antwortbearbeitungSendeSpielzug: " + antwort); // Testausgabe
