@@ -42,10 +42,17 @@ function timerStarten() // Verbindungsaufbau für Spiel starten
 {
     if (document.getElementById("spieler").value !== "") // Spielernamen eigegeben?
     {
-        document.getElementById("spieler").readOnly = true; // Feld für Spielernamen sperren
-        document.getElementById("start").removeEventListener("click", timerStarten); // nur 1x Spiel beginnen
-        grund = "beitritt";
-        serverAnfrage(); // Spielbeitritt
+        if(document.getElementById("spieler").value.includes(";"))
+        {
+            alert("Ungültiges Zeichen ';' im Spielernamen entdeckt!");
+        }
+        else
+        {
+            document.getElementById("spieler").readOnly = true; // Feld für Spielernamen sperren
+            document.getElementById("start").removeEventListener("click", timerStarten); // nur 1x Spiel beginnen
+            grund = "beitritt";
+            serverAnfrage(); // Spielbeitritt
+        }
     }
     else
     {
@@ -100,24 +107,21 @@ function feldauswahl()
             let lang = 0;
             let anfang = "";
             let richtung = "";
-            let fix = ""; // Ziffer oder Zahl, je nach dem, was gleich
 
-            if (spieleraktion.charAt(0) === aktion.charAt(0))
+            if (spieleraktion.charAt(0) === aktion.charAt(0)) // Zeile
             {
-                fix = "zeile";
                 lang = aktion.slice(1) - spieleraktion.slice(1); // Berechnung
                 richtung = "h"; // Anpassung der Ausrichtung
             }
-            else
+            else // Spalte
             {
-                fix = "spalte";
                 lang = spieleraktion.charCodeAt(0) - aktion.charCodeAt(0); // Berechnung
                 richtung = "v"; // Anpassung der Ausrichtung
             }
             lang = korrigiereLang(lang); // Schifflänge korrigieren wegen Rechnung + Vorzeichen
             //console.log("Länge: "+lang); // Testausgabe
             //console.log("Richtung: "+richtung); // Testausgabe
-            if (6 > lang && lang > 1)
+            if (6 > lang && lang > 1) // Überprüfung ob gültige Länge
             {
                 //let temp = null; // temporäres Zahl oder Buchstabe zur Überprüfung (Zeile / Spalte)
 
@@ -152,7 +156,7 @@ function feldauswahl()
             alert("Schiffe können nicht diagonal platziert werden!"); // Meldung an Spieler
         }
 
-        spieleraktion = ""; // Spieleraktion wird zurückgesetzt (1. klick)
+        spieleraktion = ""; // Spieleraktion wird zurückgesetzt (1. Klick)
     }
 }
 
@@ -285,7 +289,7 @@ function platziereSchiff(start, wert, ausrichtung)
                 // rechte Seite sperren
                 temp = String.fromCharCode(schiffende[1].charCodeAt(0) + zusatz) + zusatzsperreEnde; // Erzeugung der ID rechts
                 pruefen = document.getElementById("spieler." + temp);
-                //console.log("neu Temp: " + temp);
+                //console.log("neu Temp: " + temp); // Testausgabe
                 if (pruefen !== null)
                 {
                     sperrbereich.push(pruefen);
@@ -317,7 +321,7 @@ function platziereSchiff(start, wert, ausrichtung)
                 // rechte Seite sperren
                 temp = zusatzsperreEnde + (parseInt(schiffende[1].slice(1)) + zusatz); // Erzeugung der ID unten
                 pruefen = document.getElementById("spieler." + temp);
-                //console.log("neu Temp: " + temp);
+                //console.log("neu Temp: " + temp); // Testausgabe
                 if (pruefen !== null)
                 {
                     sperrbereich.push(pruefen);
@@ -452,7 +456,7 @@ function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeiche
             //console.log(idFeld); // id-Ausgabe zum Test
             document.getElementById(idFeldSpieler).innerHTML = "W"; // Wasserzeichen
             document.getElementById(idFeldGegner).innerHTML = "?"; // unbekannte Gegnerflächen
-            //console.log("idFeld remove: " + idFeld);
+            //console.log("idFeld remove: " + idFeld); // Testausgabe
         }
         index = String.fromCharCode(index.charCodeAt(0) + 1); // nächster Buchstabe
     }
@@ -511,9 +515,8 @@ function serverAnfrage()
         //console.log("Form für Token???"); // Testausgabe
         tokenAbfrage();
     }
-    else if (grund === "spielzug")
+    else if (grund === "spielzug") // bei Schuss auf Feld
     {
-        // Inhalt
         sendeSpielzug();
     }
 }
@@ -539,7 +542,7 @@ function ajax() // Antwort des php-Skripts
             antwortbearbeitungTokenAbfrage(antwort);
             //console.log("Hab ich Token?"); // Testausgabe
         }
-        else if (grund === "spielzug")
+        else if (grund === "spielzug") // Rückmeldung des Schusses auf ein Feld
         {
             antwortbearbeitungSendeSpielzug(antwort);
         }
@@ -618,7 +621,7 @@ function beitrittsabfrage() // alle 5 Sekunden bis Spieler2 beigetreten
 
 function anwortbearbeitungBeitrittsabfrage(antwort) // Überprüfung ob Spieler2 beigetreten ist
 {
-    //console.log("Beitritt: " + antwort);
+    //console.log("Beitritt: " + antwort); // Testausgabe
     if (antwort !== "") // nur wenn Spieler2 eingetragen ist
     {
         document.getElementById("status").innerHTML = "Warten auf Spielzug...";
@@ -642,7 +645,7 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
 {
     let temp = antwort.split(";"); // Seperatisieren von Token & letzter Spielzug
     //console.log("Token: " + temp[0]); // Testausgabe
-    //console.log("ID Feld: " + temp[1]);
+    //console.log("ID Feld: " + temp[1]); // Testausgabe
     if (temp[0] === spielerID) // Eigener Token
     {
         clearInterval(intervall); // Intervall entfernen, da Spieler mit Spielzug dran ist
@@ -672,11 +675,12 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
                 }
             }
 
-            // Testausgaben
+            /* Testausgaben
             //console.log("Schiffe: ");
             //console.log(schiffe);
             //console.log("Position (Array): " + position);
             //console.log("Länge des Schiffes: " + schifflange[position]);
+            */
 
             if (-1 < position) // wenn Position gesetzt (Schiff versunken)
             {
@@ -707,6 +711,7 @@ function antwortbearbeitungTokenAbfrage(antwort) // Überprüfung, ob eigener To
             if (document.getElementById("spieler." + temp[1]).innerHTML === "W")
             {
                 document.getElementById("spieler." + temp[1]).style.backgroundColor = "yellow"; // wenn Schuss auf Wasser, dann Gelb
+                document.getElementById("status").innerHTML = "Gegnerischer Schuss ging ins Wasser."; // Meldung, dass Schuss daneben
             }
             else if (document.getElementById("spieler." + temp[1]).innerHTML === "O")
             {
@@ -746,7 +751,7 @@ function spielzug() // beim Klick auf gegnerisches Spielfeld
     {
         let id = this.id;
         //console.log(id); // Testausgabe
-        if (grund === "spielzug")
+        if (grund === "spielzug") // nur wenn Spieler dran ist
         {
             zuganzahl++;
             let temp = id.split("."); // gegnerID aufteilen
@@ -875,10 +880,10 @@ function aktionEntfernen() // Eventlistener für gegnerisches Spielfeld entferne
     }
 }
 
-function statistikausgabe()
+function statistikausgabe() // Eintrag in Statistikbereich unter der Schiffanzeige
 {
-    let ausgabe = "<br><br>" + treffer + " Treffer von " + zuganzahl + " Schüssen<br>";
-    ausgabe += "<br>Eigene Trefferquote: " + parseInt(100 * treffer / zuganzahl) + " %";
+    let ausgabe = "<br><br>" + treffer + " Treffer von " + zuganzahl + " Schüssen<br>"; // x Treffer von y Schüssen
+    ausgabe += "<br>Eigene Trefferquote: " + parseInt(100 * treffer / zuganzahl) + " %"; // ganze % ohne Kommastellen
 
     document.getElementById("statistik").innerHTML = ausgabe;
 }
