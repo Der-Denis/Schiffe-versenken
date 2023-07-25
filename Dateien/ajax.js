@@ -872,7 +872,7 @@ function aktionEntfernen() // Eventlistener für gegnerisches Spielfeld entferne
         {
             //console.log("Index: "+index); // Testausgabe
             let idFeld = "gegner." + index + zahl;
-            //console.log("idFeld add: " + idFeld); // id-Ausgabe zum Test
+            //console.log("idFeld remove: " + idFeld); // id-Ausgabe zum Test
             document.getElementById(idFeld).removeEventListener("click", feldauswahl);
             //console.log(auswahl); // Testausgabe
         }
