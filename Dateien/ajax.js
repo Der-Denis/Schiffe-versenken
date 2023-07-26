@@ -1,5 +1,5 @@
 // Variablen
-let zahler = 0; // Serveranfragen-Zähler für Tests
+//let zahler = 0; // Serveranfragen-Zähler für Tests
 let anzahl = 10; // für Zeilen & Spalten -> 10 x 10 = 100 Felder
 let index = 'a'; // Zeilenanfang für Schleifen
 let spieleraktion = ""; // Klick des Spielers (ID des angeklicktgen Elements)
@@ -465,7 +465,7 @@ function vorbereitenFelder() // alle Spielflächen beider Spielfelder mit Zeiche
 // Spielersuche zum Registrieren in Datei zum Aufbau des Spiels
 function serverAnfrage()
 {
-    zahler++; // AnfrageNr für Tests
+    //zahler++; // AnfrageNr für Tests
     //console.log("Serveranfrage: " + zahler); // Testausgabe
 
     // Anfang - Browserweiche
@@ -773,7 +773,7 @@ function spielzug() // beim Klick auf gegnerisches Spielfeld
 
 function sendeSpielzug()
 {
-    //console.log("Spielzug wird gesendet.");
+    //console.log("Spielzug wird gesendet."); // Testausgabe
     let formDaten = new FormData();
 
     formDaten.append("spielerID", spielerID); // übergeben ID
